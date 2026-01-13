@@ -12,6 +12,9 @@ import (
 
 var DB *gorm.DB
 
+func GetDB() *gorm.DB {
+	return DB
+}
 func SetupMySQL() {
 	var err error
 	dsn := fmt.Sprintf(

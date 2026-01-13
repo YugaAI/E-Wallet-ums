@@ -1,0 +1,30 @@
+package services
+
+import (
+	"context"
+	"ewallet-framework/internal/interfaces"
+	"ewallet-framework/internal/model"
+
+	"golang.org/x/crypto/bcrypt"
+)
+
+type RegisterService struct {
+	RegisterRepo interfaces.IRegisterRepository
+}
+
+func (svc *RegisterService) Register(ctx context.Context, request model.Users) (interface{}, error) {
+
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+	request.Password = string(hashPass)
+
+	err = svc.RegisterRepo.InsertUser(ctx, &request)
+	if err != nil {
+		return nil, err
+	}
+	resp := request
+	resp.Password = ""
+	return resp, nil
+}
