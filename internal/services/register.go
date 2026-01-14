@@ -9,18 +9,17 @@ import (
 )
 
 type RegisterService struct {
-	RegisterRepo interfaces.IRegisterRepository
+	UserRepo interfaces.IUserRepository
 }
 
 func (svc *RegisterService) Register(ctx context.Context, request model.Users) (interface{}, error) {
-
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
 	request.Password = string(hashPass)
 
-	err = svc.RegisterRepo.InsertUser(ctx, &request)
+	err = svc.UserRepo.InsertUser(ctx, &request)
 	if err != nil {
 		return nil, err
 	}
