@@ -2,12 +2,13 @@ package services
 
 import (
 	"context"
-	"errors"
 	"ewallet-framework/helpers"
 	"ewallet-framework/internal/interfaces"
 	"ewallet-framework/internal/model"
+	"log"
 	"time"
 
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,30 +30,33 @@ func (svc *LoginService) Login(ctx context.Context, req model.LoginRequest) (mod
 		return resp, errors.New("password incorrect")
 	}
 
-	token, errToken := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "jwt", now)
-	if errToken != nil {
-		return resp, errors.New("token generation failed")
+	token, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "token", userDetail.Email, now)
+	if err != nil {
+		return resp, errors.Wrap(err, "failed to generate token")
 	}
 
-	refreshToken, errRefreshToken := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "jwt", now)
-	if errRefreshToken != nil {
-		return resp, errors.New("Refresh Token generation failed")
+	refreshToken, err := helpers.GenerateToken(ctx, userDetail.ID, userDetail.Username, userDetail.FullName, "refresh_token", userDetail.Email, now)
+	if err != nil {
+		return resp, errors.Wrap(err, "failed to generate refresh token")
 	}
+
 	userSession := &model.UserSession{
 		UserID:              userDetail.ID,
 		Token:               token,
 		RefreshToken:        refreshToken,
 		TokenExpired:        now.Add(helpers.MapTypeToken["token"]),
-		TokenRefreshExpired: now.Add(helpers.MapTypeToken["refresh_token"]),
+		RefreshTokenExpired: now.Add(helpers.MapTypeToken["refresh_token"]),
 	}
 	err = svc.LoginRepo.InsertNewUserSession(ctx, userSession)
 	if err != nil {
 		return resp, errors.New(" user session creation failed")
 	}
-
+	log.Println("LOGIN TOKEN:", token)
+	log.Println("LOGIN REFRESH:", refreshToken)
 	resp.UserID = userDetail.ID
 	resp.Username = userDetail.Username
 	resp.FullName = userDetail.FullName
+	resp.Email = userDetail.Email
 	resp.Token = token
 	resp.RefreshToken = refreshToken
 

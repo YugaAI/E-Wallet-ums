@@ -53,3 +53,22 @@ func (r *UserRepository) GetUserSessionByToken(ctx context.Context, token string
 	}
 	return userToken, nil
 }
+
+func (r *UserRepository) UpdateToken(ctx context.Context, token, refreshToken string) error {
+	return r.DB.Exec("UPDATE user_session SET token=? WHERE refresh_token=?", token, refreshToken).Error
+}
+
+func (r *UserRepository) GetUserSessionByRefreshToken(ctx context.Context, refreshToken string) (model.UserSession, error) {
+	var (
+		session model.UserSession
+		err     error
+	)
+	err = r.DB.Where("refresh_token = ?", refreshToken).First(&session).Error
+	if err != nil {
+		return session, err
+	}
+	if session.ID == 0 {
+		return session, errors.New("session not found")
+	}
+	return session, nil
+}

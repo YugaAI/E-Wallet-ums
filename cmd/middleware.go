@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"ewallet-framework/constants"
 	"ewallet-framework/helpers"
 	"log"
 	"net/http"
@@ -10,63 +9,94 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (d *Dependency) MiddlewareValidateAuth(c *gin.Context) {
-	if d == nil || d.UserRepository == nil {
-		log.Println("UserRepository is nil")
-		helpers.SendResponse(c, http.StatusInternalServerError, constants.ErrServerError, nil)
-		c.Abort()
-		return
-	}
-
-	auth := c.Request.Header.Get("Authorization")
+func (d *Dependency) MiddlewareValidateAuth(ctx *gin.Context) {
+	auth := ctx.Request.Header.Get("Authorization")
 	if auth == "" {
-		log.Println("auth is empty")
-		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
-		c.Abort()
+		log.Println("authorization empty")
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
 		return
 	}
 
-	_, err := d.UserRepository.GetUserSessionByToken(c.Request.Context(), auth)
+	_, err := d.UserRepository.GetUserSessionByToken(ctx.Request.Context(), auth)
 	if err != nil {
-		log.Println(err)
-		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
-		c.Abort()
+		log.Println("failed to get user session on DB: ", err)
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
 		return
 	}
-	claim, err := helpers.ValidateToken(c.Request.Context(), auth)
+
+	claim, err := helpers.ValidateToken(ctx.Request.Context(), auth)
 	if err != nil {
 		log.Println(err)
-		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
-		c.Abort()
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
 		return
 	}
+
 	if time.Now().Unix() > claim.ExpiresAt.Unix() {
-		log.Println("token is expired")
-		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
-		c.Abort()
+		log.Println("jwt token is expired: ", claim.ExpiresAt)
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
 		return
 	}
-	c.Set("token", claim)
 
-	c.Next()
-	return
+	ctx.Set("token", claim)
+
+	ctx.Next()
 }
 
-func (d *Dependency) MiddlewareLogout(c *gin.Context) {
-	token := c.GetHeader("Authorization")
-	if token == "" {
-		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
-		c.Abort()
+//func (d *Dependency) MiddlewareLogout(c *gin.Context) {
+//	token := c.GetHeader("Authorization")
+//	if token == "" {
+//		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
+//		c.Abort()
+//		return
+//	}
+//
+//	_, err := d.UserRepository.GetUserSessionByToken(c.Request.Context(), token)
+//	if err != nil {
+//		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
+//		c.Abort()
+//		return
+//	}
+//	c.Next()
+//}
+
+func (d *Dependency) MiddlewareRefreshToken(ctx *gin.Context) {
+
+	auth := ctx.Request.Header.Get("Authorization")
+	if auth == "" {
+		log.Println("authorization empty")
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
 		return
 	}
 
-	// CUMA cek DB
-	_, err := d.UserRepository.GetUserSessionByToken(c.Request.Context(), token)
+	_, err := d.UserRepository.GetUserSessionByRefreshToken(ctx.Request.Context(), auth)
 	if err != nil {
-		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
-		c.Abort()
+		log.Println("failed to get user session on DB: ", err)
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
 		return
 	}
 
-	c.Next()
+	claim, err := helpers.ValidateToken(ctx.Request.Context(), auth)
+	if err != nil {
+		log.Println(err)
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
+		return
+	}
+
+	if time.Now().Unix() > claim.ExpiresAt.Unix() {
+		log.Println("jwt token is expired: ", claim.ExpiresAt)
+		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
+		ctx.Abort()
+		return
+	}
+
+	ctx.Set("token", claim)
+
+	ctx.Next()
 }

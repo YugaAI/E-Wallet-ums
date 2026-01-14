@@ -18,12 +18,7 @@ func (api *LogoutHandler) Logout(c *gin.Context) {
 		log = helpers.Logger
 	)
 
-	token := c.GetHeader("Authorization")
-	if token == "" {
-		helpers.SendResponse(c, http.StatusUnauthorized, constants.ErrUnauthorized, nil)
-		return
-	}
-	
+	token := c.Request.Header.Get("Authorization")
 	err := api.LogoutSvc.Logout(c.Request.Context(), token)
 	if err != nil {
 		log.Error("Faild to Logout", err)
@@ -31,5 +26,4 @@ func (api *LogoutHandler) Logout(c *gin.Context) {
 		return
 	}
 	helpers.SendResponse(c, http.StatusOK, constants.SuccessMessage, nil)
-
 }
