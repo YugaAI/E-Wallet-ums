@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"ewallet-framework/internal/model"
+	"ewallet-ums/internal/model"
 	"fmt"
 	"log"
 

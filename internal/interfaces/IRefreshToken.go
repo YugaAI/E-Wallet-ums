@@ -2,8 +2,8 @@ package interfaces
 
 import (
 	"context"
-	"ewallet-framework/helpers"
-	"ewallet-framework/internal/model"
+	"ewallet-ums/helpers"
+	"ewallet-ums/internal/model"
 
 	"github.com/gin-gonic/gin"
 )

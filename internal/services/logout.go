@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"ewallet-framework/internal/interfaces"
+	"ewallet-ums/internal/interfaces"
 )
 
 type LogoutService struct {

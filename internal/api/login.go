@@ -1,10 +1,10 @@
 package api
 
 import (
-	"ewallet-framework/constants"
-	"ewallet-framework/helpers"
-	"ewallet-framework/internal/interfaces"
-	"ewallet-framework/internal/model"
+	"ewallet-ums/constants"
+	"ewallet-ums/helpers"
+	"ewallet-ums/internal/interfaces"
+	"ewallet-ums/internal/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

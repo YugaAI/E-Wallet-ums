@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"ewallet-framework/helpers"
-	"ewallet-framework/internal/api"
-	"ewallet-framework/internal/interfaces"
-	"ewallet-framework/internal/repository"
-	"ewallet-framework/internal/services"
+	"ewallet-ums/helpers"
+	"ewallet-ums/internal/api"
+	"ewallet-ums/internal/interfaces"
+	"ewallet-ums/internal/repository"
+	"ewallet-ums/internal/services"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -32,12 +32,13 @@ func ServerHTTP() {
 }
 
 type Dependency struct {
-	UserRepository  interfaces.IUserRepository
-	HealthcheckAPI  interfaces.IHealtCheckHandler
-	RegisterAPI     interfaces.IRegisterHandler
-	LoginApi        interfaces.ILoginHandler
-	LogoutApi       interfaces.ILogoutHandler
-	RefreshTokenAPI interfaces.IRefreshTokenHandler
+	UserRepository     interfaces.IUserRepository
+	HealthcheckAPI     interfaces.IHealtCheckHandler
+	RegisterAPI        interfaces.IRegisterHandler
+	LoginApi           interfaces.ILoginHandler
+	LogoutApi          interfaces.ILogoutHandler
+	RefreshTokenAPI    interfaces.IRefreshTokenHandler
+	ValidationTokenAPI *api.TokenValidationAPI
 }
 
 func dependencyInject() Dependency {
@@ -72,12 +73,19 @@ func dependencyInject() Dependency {
 	RefreshTokenAPI := &api.RefreshTokenHandler{
 		RefreshTokenSvc: RefreshTokenSvc,
 	}
+	TokenValidationSvc := &services.TokenValidationService{
+		ValidateTokenRepo: userRepo,
+	}
+	TokenValidationAPI := &api.TokenValidationAPI{
+		TokenValidationSVC: TokenValidationSvc,
+	}
 	return Dependency{
-		UserRepository:  userRepo,
-		HealthcheckAPI:  &healthcheckAPI,
-		RegisterAPI:     &registerAPI,
-		LoginApi:        loginAPI,
-		LogoutApi:       logoutAPI,
-		RefreshTokenAPI: RefreshTokenAPI,
+		UserRepository:     userRepo,
+		HealthcheckAPI:     &healthcheckAPI,
+		RegisterAPI:        &registerAPI,
+		LoginApi:           loginAPI,
+		LogoutApi:          logoutAPI,
+		RefreshTokenAPI:    RefreshTokenAPI,
+		ValidationTokenAPI: TokenValidationAPI,
 	}
 }

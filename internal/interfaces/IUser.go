@@ -2,7 +2,7 @@ package interfaces
 
 import (
 	"context"
-	"ewallet-framework/internal/model"
+	"ewallet-ums/internal/model"
 )
 
 type IUserRepository interface {

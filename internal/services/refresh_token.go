@@ -2,9 +2,9 @@ package services
 
 import (
 	"context"
-	"ewallet-framework/helpers"
-	"ewallet-framework/internal/interfaces"
-	"ewallet-framework/internal/model"
+	"ewallet-ums/helpers"
+	"ewallet-ums/internal/interfaces"
+	"ewallet-ums/internal/model"
 	"time"
 
 	"github.com/pkg/errors"

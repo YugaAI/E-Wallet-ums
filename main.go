@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ewallet-framework/cmd"
-	"ewallet-framework/helpers"
+	"ewallet-ums/cmd"
+	"ewallet-ums/helpers"
 )
 
 func main() {

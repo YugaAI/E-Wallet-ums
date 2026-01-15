@@ -2,9 +2,9 @@ package services
 
 import (
 	"context"
-	"ewallet-framework/helpers"
-	"ewallet-framework/internal/interfaces"
-	"ewallet-framework/internal/model"
+	"ewallet-ums/helpers"
+	"ewallet-ums/internal/interfaces"
+	"ewallet-ums/internal/model"
 	"log"
 	"time"
 
@@ -53,6 +53,7 @@ func (svc *LoginService) Login(ctx context.Context, req model.LoginRequest) (mod
 	}
 	log.Println("LOGIN TOKEN:", token)
 	log.Println("LOGIN REFRESH:", refreshToken)
+
 	resp.UserID = userDetail.ID
 	resp.Username = userDetail.Username
 	resp.FullName = userDetail.FullName

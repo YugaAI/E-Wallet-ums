@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"ewallet-framework/internal/interfaces"
-	"ewallet-framework/internal/model"
+	"ewallet-ums/internal/interfaces"
+	"ewallet-ums/internal/model"
 
 	"golang.org/x/crypto/bcrypt"
 )

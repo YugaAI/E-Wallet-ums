@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	"ewallet-framework/internal/model"
+	"ewallet-ums/internal/model"
 
 	"gorm.io/gorm"
 )
