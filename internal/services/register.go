@@ -10,6 +10,7 @@ import (
 
 type RegisterService struct {
 	UserRepo interfaces.IUserRepository
+	External interfaces.IExternal
 }
 
 func (svc *RegisterService) Register(ctx context.Context, request model.Users) (interface{}, error) {
@@ -23,6 +24,12 @@ func (svc *RegisterService) Register(ctx context.Context, request model.Users) (
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = svc.External.CreateWallet(ctx, request.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	resp := request
 	resp.Password = ""
 	return resp, nil
