@@ -4,6 +4,7 @@ import (
 	"context"
 	"ewallet-ums/internal/interfaces"
 	"ewallet-ums/internal/model"
+	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -28,6 +29,10 @@ func (svc *RegisterService) Register(ctx context.Context, request model.Users) (
 	_, err = svc.External.CreateWallet(ctx, request.ID)
 	if err != nil {
 		return nil, err
+	}
+
+	if err := svc.External.NotifyUserRegistered(request.ID, request.Email, request.FullName); err != nil {
+		return nil, fmt.Errorf("failed to notify user: %w", err)
 	}
 
 	resp := request

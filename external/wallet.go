@@ -17,9 +17,6 @@ type Wallet struct {
 	Balance float64 `json:"balance"`
 }
 
-type External struct {
-}
-
 func (e *External) CreateWallet(ctx context.Context, userID int) (*Wallet, error) {
 	req := Wallet{
 		UserID: userID,

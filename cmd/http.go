@@ -48,7 +48,14 @@ func dependencyInject() Dependency {
 		HealthCheckServices: healthCheckSvc,
 	}
 
-	ext := &external.External{}
+	notifClient, err := external.NewNotificationClient(helpers.GetEnv("NOTIFICATION_GRPC_HOST", "localhost:7003"))
+	if err != nil {
+		log.Fatal("failed to init notification client")
+	}
+
+	ext := &external.External{
+		NotificationClient: notifClient,
+	}
 	userRepo := &repository.UserRepository{
 		DB: helpers.GetDB(),
 	}

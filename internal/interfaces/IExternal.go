@@ -7,4 +7,5 @@ import (
 
 type IExternal interface {
 	CreateWallet(ctx context.Context, userID int) (*external.Wallet, error)
+	NotifyUserRegistered(userID int, email, fullName string) error
 }
