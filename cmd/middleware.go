@@ -10,15 +10,23 @@ import (
 )
 
 func (d *Dependency) MiddlewareValidateAuth(ctx *gin.Context) {
-	auth := ctx.Request.Header.Get("Authorization")
-	if auth == "" {
+	authHeader := ctx.Request.Header.Get("Authorization")
+	if authHeader == "" {
 		log.Println("authorization empty")
 		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
 		ctx.Abort()
 		return
 	}
 
-	_, err := d.UserRepository.GetUserSessionByToken(ctx.Request.Context(), auth)
+	// strip "Bearer " prefix
+	const prefix = "Bearer "
+	token := authHeader
+	if len(authHeader) > len(prefix) && authHeader[:len(prefix)] == prefix {
+		token = authHeader[len(prefix):]
+	}
+
+	// cek session DB
+	_, err := d.UserRepository.GetUserSessionByToken(ctx.Request.Context(), token)
 	if err != nil {
 		log.Println("failed to get user session on DB: ", err)
 		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
@@ -26,14 +34,16 @@ func (d *Dependency) MiddlewareValidateAuth(ctx *gin.Context) {
 		return
 	}
 
-	claim, err := helpers.ValidateToken(ctx.Request.Context(), auth)
+	// validasi JWT
+	claim, err := helpers.ValidateToken(ctx.Request.Context(), token)
 	if err != nil {
-		log.Println(err)
+		log.Println("failed to validate JWT: ", err)
 		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
 		ctx.Abort()
 		return
 	}
 
+	// cek expired
 	if time.Now().Unix() > claim.ExpiresAt.Unix() {
 		log.Println("jwt token is expired: ", claim.ExpiresAt)
 		helpers.SendResponse(ctx, http.StatusUnauthorized, "unauthorized", nil)
@@ -41,8 +51,8 @@ func (d *Dependency) MiddlewareValidateAuth(ctx *gin.Context) {
 		return
 	}
 
+	// simpan claim di context
 	ctx.Set("token", claim)
-
 	ctx.Next()
 }
 
